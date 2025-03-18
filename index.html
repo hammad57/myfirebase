@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom background gradient */
+        body {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Arial', sans-serif;
+            position: relative;
+        }
+
+        /* Welcome message styling */
+        .welcome-message {
+            color: White;
+            font-size: 3rem; /* Larger font size */
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 4px 4px 6px rgba(2, 2, 2, 2.10); /* Text shadow for better visibility */
+        }
+
+        /* Styling for the username in the welcome message */
+        #welcomeMessage {
+            background-color: Blue; /* Grey background */
+            color: Red; /* Yellow text */
+            font-size: 1rem; /* Larger font size */
+            padding: 10px 20px; /* Padding for better spacing */
+            border-radius: 10px; /* Rounded corners */
+            display: inline-block; /* Ensure it doesn't take full width */
+            margin-top: 10px; /* Add some margin */
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.1); /* Semi-transparent background */
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px); /* Blur effect */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Sidebar buttons styling */
+        .sidebar button {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.3s;
+            color: white;
+            border: none;
+            width: 100%;
+        }
+
+        .sidebar button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Dashboard content styling */
+        .dashboard-content {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* Card styling for dashboard content */
+        .dashboard-content .card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* Login screen styling */
+        #loginScreen {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        #loginScreen .login-box {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Footer styling */
+        footer {
+            position: absolute;
+            bottom: 10px;
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="theme-window">
+    <!-- Welcome Message -->
+    <div class="welcome-message">Welcome to Firebase Panel</div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="fixed inset-0 flex items-center justify-center">
+        <div class="login-box">
+            <h2 class="text-2xl font-bold mb-6 text-center">Welcome to Firebase Login</h2>
+            <input type="text" id="username" placeholder="Username" class="border p-2 w-full mb-4 rounded" autofocus>
+            <input type="password" id="password" placeholder="Password" class="border p-2 w-full mb-4 rounded">
+            <button id="loginBtn" class="bg-blue-600 text-white p-2 w-full rounded hover:bg-blue-700">Login</button>
+            <button id="forgetBtn" class="bg-gray-500 text-white p-2 w-full rounded mt-2 hover:bg-gray-600">Forget</button>
+            <div id="changeCredentials" class="hidden mt-4">
+                <button id="changeUsernameBtn" class="bg-yellow-500 text-white p-2 w-full rounded hover:bg-yellow-600">Change Username</button>
+                <button id="changePasswordBtn" class="bg-yellow-500 text-white p-2 w-full rounded mt-2 hover:bg-yellow-600">Change Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="hidden flex">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2 class="text-lg font-bold mb-4">Admin Panel</h2>
+            <button id="logoutBtn">🚪 Logout</button>
+            <button id="themeBtn">🎨 Change Theme</button>
+            <button id="downloadAllBtn">📥 Download All Data</button>
+            <div class="mt-6">
+                <p id="welcomeMessage" class="text-lg font-semibold"></p>
+                <p id="lastLogin" class="text-sm text-gray-300"></p>
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-content">
+            <div class="card">
+                <h2 class="text-3xl font-bold text-center mb-6 text-gray-800">🔥 Firebase Dashboard</h2>
+
+                <!-- Add Title Section -->
+                <div class="mb-6">
+                    <button id="addTitleBtn" class="bg-purple-500 text-white p-3 rounded-lg w-full hover:bg-purple-600 transition-all">Add Title</button>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="mb-6">
+                    <input type="text" id="searchInput" class="border p-3 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search data...">
+                </div>
+
+                <!-- Data Input Section -->
+                <div class="mb-6">
+                    <input type="text" id="userInput" class="border p-3 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter data...">
+                    <select id="nodeSelect" class="border p-3 w-full mt-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <!-- Options will be dynamically populated -->
+                    </select>
+                    <button id="saveBtn" class="bg-blue-600 text-white p-3 rounded-lg mt-3 w-full hover:bg-blue-700 transition-all">Add Data</button>
+                </div>
+
+                <!-- Stored Data Section -->
+                <h3 class="text-2xl font-semibold mb-4 text-gray-700">Stored Data</h3>
+                <div id="dataSections"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        Powered by Muluk Hussain
+    </footer>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getDatabase, ref, push, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC1EPkSRoGkR5GhFbPsDjJRYMxhgVDIHNI",
+            authDomain: "mydata-a44fc.firebaseapp.com",
+            databaseURL: "https://mydata-a44fc-default-rtdb.firebaseio.com",
+            projectId: "mydata-a44fc",
+            storageBucket: "mydata-a44fc.appspot.com",
+            messagingSenderId: "616394637431",
+            appId: "1:616394637431:web:a97562d01c2e4333024672",
+            measurementId: "G-LDYBTFBB6C"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // DOM Elements
+        const userInput = document.getElementById("userInput");
+        const nodeSelect = document.getElementById("nodeSelect");
+        const dataSections = document.getElementById("dataSections");
+        const loginScreen = document.getElementById("loginScreen");
+        const dashboard = document.getElementById("dashboard");
+        const loginBtn = document.getElementById("loginBtn");
+        const forgetBtn = document.getElementById("forgetBtn");
+        const changeCredentials = document.getElementById("changeCredentials");
+        const changeUsernameBtn = document.getElementById("changeUsernameBtn");
+        const changePasswordBtn = document.getElementById("changePasswordBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const themeBtn = document.getElementById("themeBtn");
+        const downloadAllBtn = document.getElementById("downloadAllBtn");
+        const addTitleBtn = document.getElementById("addTitleBtn");
+        const welcomeMessage = document.getElementById("welcomeMessage");
+        const lastLogin = document.getElementById("lastLogin");
+        const searchInput = document.getElementById("searchInput");
+        const saveBtn = document.getElementById("saveBtn");
+
+        // Load saved credentials from localStorage
+        let savedCredentials = JSON.parse(localStorage.getItem("credentials")) || { username: "a", password: "a" };
+
+        // Load last login details from localStorage
+        let lastLoginDetails = JSON.parse(localStorage.getItem("lastLoginDetails")) || {};
+
+        // Fetch IP address and location
+        async function fetchIPAndLocation() {
+            try {
+                const response = await fetch("https://ipapi.co/json/");
+                const data = await response.json();
+                return {
+                    ip: data.ip,
+                    city: data.city,
+                    region: data.region,
+                    country: data.country_name,
+                    org: data.org,
+                };
+            } catch (error) {
+                console.error("Error fetching IP and location:", error);
+                return {
+                    ip: "Unknown",
+                    city: "Unknown",
+                    region: "Unknown",
+                    country: "Unknown",
+                    org: "Unknown",
+                };
+            }
+        }
+
+        // Update welcome message and last login details
+        function updateWelcomeMessage(username) {
+            welcomeMessage.textContent = `Welcome ${username}`;
+            if (lastLoginDetails.timestamp) {
+                const lastLoginDate = new Date(parseInt(lastLoginDetails.timestamp));
+                lastLogin.innerHTML = `
+                    Last Login Attempted on ${lastLoginDate.toLocaleString()}<br>
+                    IP Address: ${lastLoginDetails.ip}<br>
+                    Location: ${lastLoginDetails.city}, ${lastLoginDetails.region}, ${lastLoginDetails.country}<br>
+                    Network: ${lastLoginDetails.org}
+                `;
+            } else {
+                lastLogin.textContent = "First login attempt";
+            }
+        }
+
+        // Login Functionality
+        loginBtn.addEventListener("click", async function () {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            if (username === savedCredentials.username && password === savedCredentials.password) {
+                loginScreen.classList.add("hidden");
+                dashboard.classList.remove("hidden");
+
+                // Fetch IP and location details
+                const { ip, city, region, country, org } = await fetchIPAndLocation();
+
+                // Save current login details
+                const currentTimestamp = new Date().getTime();
+                lastLoginDetails = {
+                    timestamp: currentTimestamp,
+                    ip,
+                    city,
+                    region,
+                    country,
+                    org,
+                };
+                localStorage.setItem("lastLoginDetails", JSON.stringify(lastLoginDetails));
+
+                // Update welcome message
+                updateWelcomeMessage(username);
+
+                // Load data from Firebase
+                loadData();
+            } else {
+                alert("Invalid username or password");
+            }
+        });
+
+        // Forget Button
+        forgetBtn.addEventListener("click", function () {
+            changeCredentials.classList.toggle("hidden");
+        });
+
+        // Change Username
+        changeUsernameBtn.addEventListener("click", function () {
+            const newUsername = prompt("Enter new username:");
+            if (newUsername) {
+                savedCredentials.username = newUsername;
+                localStorage.setItem("credentials", JSON.stringify(savedCredentials));
+                alert("Username updated successfully!");
+            }
+        });
+
+        // Change Password
+        changePasswordBtn.addEventListener("click", function () {
+            const newPassword = prompt("Enter new password:");
+            if (newPassword) {
+                savedCredentials.password = newPassword;
+                localStorage.setItem("credentials", JSON.stringify(savedCredentials));
+                alert("Password updated successfully!");
+            }
+        });
+
+        // Logout Functionality
+        logoutBtn.addEventListener("click", function () {
+            dashboard.classList.add("hidden");
+            loginScreen.classList.remove("hidden");
+        });
+
+        // Change Theme
+        themeBtn.addEventListener("click", function () {
+            const theme = prompt("Enter theme (dark, white, window):");
+            if (theme === "dark" || theme === "white" || theme === "window") {
+                document.body.className = `theme-${theme}`;
+            } else {
+                alert("Invalid theme. Please enter 'dark', 'white', or 'window'.");
+            }
+        });
+
+        // Download All Data
+        downloadAllBtn.addEventListener("click", function () {
+            let content = "";
+
+            // Fetch all data from Firebase
+            onValue(ref(db), (snapshot) => {
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        const node = childSnapshot.key;
+                        content += `=== ${node} ===\n`; // Add node title
+                        childSnapshot.forEach((dataSnapshot) => {
+                            const data = dataSnapshot.val();
+                            content += `${JSON.stringify(data, null, 2)}\n`; // Add data with formatting
+                        });
+                        content += "\n"; // Add a newline after each node's data
+                    });
+                }
+            });
+
+            setTimeout(() => {
+                const blob = new Blob([content], { type: "text/plain" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "all_data.txt";
+                a.click();
+                alert("All data downloaded successfully!");
+            }, 1000); // Wait for Firebase data to load
+        });
+
+        // Add New Title (Node)
+        addTitleBtn.addEventListener("click", function () {
+            const newTitle = prompt("Enter new title (node name):");
+            if (newTitle) {
+                // Save the new title in Firebase
+                set(ref(db, newTitle), {}).then(() => {
+                    alert(`Title "${newTitle}" added successfully!`);
+                    loadNodes(); // Reload nodes in the dropdown
+                });
+            }
+        });
+
+        // Load Nodes for Dropdown
+        function loadNodes() {
+            onValue(ref(db), (snapshot) => {
+                nodeSelect.innerHTML = ""; // Clear existing options
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        const node = childSnapshot.key;
+                        const option = document.createElement("option");
+                        option.value = node;
+                        option.textContent = node;
+                        nodeSelect.appendChild(option);
+                    });
+                }
+            });
+        }
+
+        // Add Data Functionality
+        saveBtn.addEventListener("click", function () {
+            const selectedNode = nodeSelect.value;
+            const inputData = userInput.value.trim();
+
+            if (!selectedNode || !inputData) {
+                alert("Please select a node and enter data.");
+                return;
+            }
+
+            // Push data to Firebase
+            push(ref(db, selectedNode), { text: inputData }).then(() => {
+                alert("Data added successfully!");
+                userInput.value = ""; // Clear input field
+                loadData(); // Reload data
+            }).catch((error) => {
+                console.error("Error adding data:", error);
+                alert("Failed to add data. Please try again.");
+            });
+        });
+
+        // Load Data from Firebase
+        function loadData() {
+            dataSections.innerHTML = "";
+
+            onValue(ref(db), (snapshot) => {
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        const node = childSnapshot.key;
+                        const section = document.createElement("div");
+                        section.className = "mb-6 bg-gray-50 p-4 rounded-lg shadow-md";
+                        section.innerHTML = `
+                            <h3 class='text-xl font-bold mb-3 text-gray-700'>
+                                ${node}
+                                <button class="bg-yellow-500 text-white p-2 rounded-lg editNodeBtn" data-node="${node}">Edit</button>
+                                <button class="bg-red-500 text-white p-2 rounded-lg deleteNodeBtn" data-node="${node}">Delete</button>
+                            </h3>
+                            <ul id="list-${node}" class="space-y-2"></ul>
+                        `;
+                        dataSections.appendChild(section);
+
+                        const list = document.getElementById(`list-${node}`);
+                        list.innerHTML = "";
+
+                        childSnapshot.forEach((dataSnapshot) => {
+                            const key = dataSnapshot.key;
+                            const data = dataSnapshot.val();
+                            const value = data.text || JSON.stringify(data);
+
+                            const li = document.createElement("li");
+                            li.className = "bg-gray-200 p-3 rounded-lg flex justify-between items-center";
+                            li.innerHTML = `
+                                <span>${value}</span>
+                                <div>
+                                    <button class="bg-green-500 text-white p-2 rounded-lg editBtn" data-node="${node}" data-key="${key}">Edit</button>
+                                    <button class="bg-red-500 text-white p-2 rounded-lg deleteBtn" data-node="${node}" data-key="${key}">Delete</button>
+                                </div>
+                            `;
+                            list.appendChild(li);
+                        });
+                    });
+                } else {
+                    dataSections.innerHTML = "<p class='text-center text-gray-500'>No Data Found</p>";
+                }
+            });
+        }
+
+        // Edit Node
+        document.addEventListener("click", function (event) {
+            if (event.target.classList.contains("editNodeBtn")) {
+                const node = event.target.dataset.node;
+                const newTitle = prompt("Enter new title for this node:", node);
+                if (newTitle) {
+                    // Fetch data from the old node
+                    onValue(ref(db, node), (snapshot) => {
+                        if (snapshot.exists()) {
+                            const data = snapshot.val();
+                            // Delete the old node
+                            remove(ref(db, node)).then(() => {
+                                // Create a new node with the updated title
+                                set(ref(db, newTitle), data).then(() => {
+                                    alert(`Node "${node}" renamed to "${newTitle}" successfully!`);
+                                    loadData(); // Reload data
+                                });
+                            });
+                        }
+                    });
+                }
+            }
+        });
+
+        // Delete Node
+        document.addEventListener("click", function (event) {
+            if (event.target.classList.contains("deleteNodeBtn")) {
+                const node = event.target.dataset.node;
+                if (confirm(`Are you sure you want to delete the node "${node}"?`)) {
+                    remove(ref(db, node)).then(() => {
+                        alert(`Node "${node}" deleted successfully!`);
+                        loadData(); // Reload data
+                    });
+                }
+            }
+        });
+
+        // Edit and Delete Buttons for Data
+        document.addEventListener("click", function (event) {
+            if (event.target.classList.contains("editBtn")) {
+                const key = event.target.dataset.key;
+                const node = event.target.dataset.node;
+                const currentText = event.target.parentElement.previousElementSibling.textContent;
+                const newValue = prompt("Edit data:", currentText);
+                if (newValue) {
+                    update(ref(db, `${node}/${key}`), { text: newValue });
+                }
+            }
+
+            if (event.target.classList.contains("deleteBtn")) {
+                const key = event.target.dataset.key;
+                const node = event.target.dataset.node;
+                if (confirm("Are you sure you want to delete this?")) {
+                    remove(ref(db, `${node}/${key}`));
+                }
+            }
+        });
+
+        // Search Functionality
+        searchInput.addEventListener("input", function () {
+            const query = searchInput.value.toLowerCase();
+            const dataItems = document.querySelectorAll("#dataSections li");
+            dataItems.forEach((item) => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(query)) {
+                    item.style.display = "flex";
+                } else {
+                    item.style.display = "none";
+                }
+            });
+        });
+
+        // Load nodes and data on page load
+        loadNodes();
+    </script>
+</body>
+</html>
